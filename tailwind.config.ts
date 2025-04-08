@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,25 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Jewelry-themed colors
+				gold: {
+					light: '#F5E7C1',
+					DEFAULT: '#D4AF37',
+					dark: '#B8860B'
+				},
+				silver: {
+					light: '#E8E8E8',
+					DEFAULT: '#C0C0C0',
+					dark: '#A9A9A9'
+				},
+				navy: {
+					light: '#1F3366',
+					DEFAULT: '#14213D',
+					dark: '#0A1428'
+				},
+				cream: {
+					DEFAULT: '#F5F5F5'
 				}
 			},
 			borderRadius: {
@@ -84,11 +104,24 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'shimmer': {
+					'0%': {
+						backgroundPosition: '-40rem 0',
+					},
+					'100%': {
+						backgroundPosition: '40rem 0',
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'shimmer': 'shimmer 2s infinite linear'
+			},
+			fontFamily: {
+				'serif': ['Playfair Display', 'serif'],
+				'sans': ['Montserrat', 'sans-serif']
 			}
 		}
 	},
