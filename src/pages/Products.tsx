@@ -23,6 +23,8 @@ import {
 import { ChevronRight, Filter, SlidersHorizontal, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/helpers';
 import { Separator } from '@/components/ui/separator';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const materialOptions = [
   { id: 'gold-24k', label: '24K Gold' },
@@ -220,76 +222,78 @@ const Products: React.FC = () => {
     filters.isDynamicPricing;
   
   return (
-    <div className="container mx-auto px-4 py-8 mt-20">
-      {/* Breadcrumbs */}
-      <nav className="flex mb-6 items-center text-sm">
-        <Link to="/" className="text-muted-foreground hover:text-navy-dark">Home</Link>
-        <ChevronRight className="mx-2 h-4 w-4 text-muted-foreground" />
-        <span className="text-navy-dark">Products</span>
-      </nav>
-      
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-serif font-bold text-navy-dark">
-          Our Collection
-        </h1>
+    <>
+      <Navbar />
+      <div className="container mx-auto px-4 py-8 mt-10">
+        {/* Breadcrumbs */}
+        <nav className="flex mb-6 items-center text-sm">
+          <Link to="/" className="text-muted-foreground hover:text-navy-dark">Home</Link>
+          <ChevronRight className="mx-2 h-4 w-4 text-muted-foreground" />
+          <span className="text-navy-dark">Products</span>
+        </nav>
         
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            className="lg:hidden"
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
-          </Button>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-serif font-bold text-navy-dark">
+            Our Collection
+          </h1>
           
-          <div className="hidden md:block">
-            <Select
-              value={filters.sort}
-              onValueChange={handleSortChange}
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              className="lg:hidden"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
-              <SelectTrigger className="w-[180px]">
-                <SlidersHorizontal className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Filter className="mr-2 h-4 w-4" />
+              Filters
+            </Button>
+            
+            <div className="hidden md:block">
+              <Select
+                value={filters.sort}
+                onValueChange={handleSortChange}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Mobile sort options */}
-      <div className="flex md:hidden mb-4">
-        <Select
-          value={filters.sort}
-          onValueChange={handleSortChange}
-        >
-          <SelectTrigger className="w-full">
-            <SlidersHorizontal className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            {sortOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      {/* Mobile filter drawer */}
-      <div className={`
-        fixed inset-0 bg-black/50 z-50 lg:hidden transition-opacity duration-200
-        ${isFilterOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-      `}>
+        
+        {/* Mobile sort options */}
+        <div className="flex md:hidden mb-4">
+          <Select
+            value={filters.sort}
+            onValueChange={handleSortChange}
+          >
+            <SelectTrigger className="w-full">
+              <SlidersHorizontal className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Mobile filter drawer */}
         <div className={`
+          fixed inset-0 bg-black/50 z-50 lg:hidden transition-opacity duration-200
+          ${isFilterOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+        `}>
+          <div className={`
           fixed right-0 top-0 h-full w-80 bg-white z-50 overflow-y-auto transition-transform duration-300
           ${isFilterOpen ? 'translate-x-0' : 'translate-x-full'}
         `}>
@@ -463,291 +467,293 @@ const Products: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
-      
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Desktop Filters Sidebar */}
-        <div className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-24 space-y-6">
-            {/* Search */}
-            <div>
-              <h3 className="font-medium mb-2">Search</h3>
-              <form onSubmit={handleSearch} className="flex flex-col">
-                <Input 
-                  name="search"
-                  placeholder="Search products" 
-                  defaultValue={filters.search}
-                  className="mb-2"
-                />
-                <Button 
-                  type="submit" 
-                  className="bg-gold hover:bg-gold-dark"
-                >
-                  Search
-                </Button>
-              </form>
-            </div>
-            
-            <Separator />
-            
-            {/* Categories */}
-            <div>
-              <h3 className="font-medium mb-2">Categories</h3>
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <div key={category.id} className="flex items-center">
-                    <Button
-                      variant="ghost"
-                      className={`justify-start p-2 text-left w-full ${
-                        filters.category === category.slug ? 'text-gold font-medium' : ''
-                      }`}
-                      onClick={() => handleCategoryChange(category.slug)}
-                    >
-                      {category.name}
-                    </Button>
-                  </div>
-                ))}
+        </div>
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Desktop Filters Sidebar */}
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-24 space-y-6">
+              {/* Search */}
+              <div>
+                <h3 className="font-medium mb-2">Search</h3>
+                <form onSubmit={handleSearch} className="flex flex-col">
+                  <Input 
+                    name="search"
+                    placeholder="Search products" 
+                    defaultValue={filters.search}
+                    className="mb-2"
+                  />
+                  <Button 
+                    type="submit" 
+                    className="bg-gold hover:bg-gold-dark"
+                  >
+                    Search
+                  </Button>
+                </form>
               </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Collections */}
-            <div>
-              <h3 className="font-medium mb-2">Collections</h3>
-              <div className="space-y-2">
-                {collections.map((collection) => (
-                  <div key={collection.id} className="flex items-center">
-                    <Button
-                      variant="ghost"
-                      className={`justify-start p-2 text-left w-full ${
-                        filters.collection === collection.name ? 'text-gold font-medium' : ''
-                      }`}
-                      onClick={() => handleCollectionChange(collection.name)}
-                    >
-                      {collection.name}
-                    </Button>
-                  </div>
-                ))}
+              
+              <Separator />
+              
+              {/* Categories */}
+              <div>
+                <h3 className="font-medium mb-2">Categories</h3>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <div key={category.id} className="flex items-center">
+                      <Button
+                        variant="ghost"
+                        className={`justify-start p-2 text-left w-full ${
+                          filters.category === category.slug ? 'text-gold font-medium' : ''
+                        }`}
+                        onClick={() => handleCategoryChange(category.slug)}
+                      >
+                        {category.name}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Materials */}
-            <div>
-              <h3 className="font-medium mb-2">Materials</h3>
-              <div className="space-y-2">
-                {materialOptions.map((material) => (
-                  <div key={material.id} className="flex items-center space-x-2">
+              
+              <Separator />
+              
+              {/* Collections */}
+              <div>
+                <h3 className="font-medium mb-2">Collections</h3>
+                <div className="space-y-2">
+                  {collections.map((collection) => (
+                    <div key={collection.id} className="flex items-center">
+                      <Button
+                        variant="ghost"
+                        className={`justify-start p-2 text-left w-full ${
+                          filters.collection === collection.name ? 'text-gold font-medium' : ''
+                        }`}
+                        onClick={() => handleCollectionChange(collection.name)}
+                      >
+                        {collection.name}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <Separator />
+              
+              {/* Materials */}
+              <div>
+                <h3 className="font-medium mb-2">Materials</h3>
+                <div className="space-y-2">
+                  {materialOptions.map((material) => (
+                    <div key={material.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`material-${material.id}`}
+                        checked={filters.materials.includes(material.id)}
+                        onCheckedChange={() => handleMaterialChange(material.id)}
+                      />
+                      <Label htmlFor={`material-${material.id}`}>{material.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <Separator />
+              
+              {/* Price Range */}
+              <div>
+                <h3 className="font-medium mb-2">Price Range</h3>
+                <div className="px-2">
+                  <Slider
+                    defaultValue={[filters.priceMin, filters.priceMax]}
+                    min={0}
+                    max={maxPrice}
+                    step={1000}
+                    value={priceRange}
+                    onValueChange={handlePriceChange}
+                    className="my-6"
+                  />
+                  <div className="flex justify-between">
+                    <span>{formatCurrency(priceRange[0])}</span>
+                    <span>{formatCurrency(priceRange[1])}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              {/* Other Options */}
+              <div>
+                <h3 className="font-medium mb-2">Other Options</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={`material-${material.id}`}
-                      checked={filters.materials.includes(material.id)}
-                      onCheckedChange={() => handleMaterialChange(material.id)}
+                      id="in-stock"
+                      checked={filters.inStock}
+                      onCheckedChange={(checked) => 
+                        setFilters(prev => ({ ...prev, inStock: !!checked }))
+                      }
                     />
-                    <Label htmlFor={`material-${material.id}`}>{material.label}</Label>
+                    <Label htmlFor="in-stock">In Stock Only</Label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="dynamic-pricing"
+                      checked={filters.isDynamicPricing}
+                      onCheckedChange={(checked) => 
+                        setFilters(prev => ({ ...prev, isDynamicPricing: !!checked }))
+                      }
+                    />
+                    <Label htmlFor="dynamic-pricing">Dynamic Pricing</Label>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Clear All Filters Button */}
+              {hasActiveFilters && (
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={clearAllFilters}
+                >
+                  Clear All Filters
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          {/* Products Grid */}
+          <div className="flex-1">
+            {/* Active Filters Display */}
+            {hasActiveFilters && (
+              <div className="mb-4 flex flex-wrap gap-2 items-center">
+                <span className="text-sm text-muted-foreground">Active Filters:</span>
+                
+                {filters.category && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setFilters(prev => ({ ...prev, category: '' }))}
+                  >
+                    Category: {categories.find(c => c.slug === filters.category)?.name}
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+                
+                {filters.collection && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setFilters(prev => ({ ...prev, collection: '' }))}
+                  >
+                    Collection: {filters.collection}
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+                
+                {filters.materials.map(material => (
+                  <Button
+                    key={material}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => handleMaterialChange(material)}
+                  >
+                    Material: {materialOptions.find(m => m.id === material)?.label}
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                ))}
+                
+                {(filters.priceMin > 0 || filters.priceMax < maxPrice) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      setPriceRange([0, maxPrice]);
+                      setFilters(prev => ({ ...prev, priceMin: 0, priceMax: maxPrice }));
+                    }}
+                  >
+                    Price: {formatCurrency(filters.priceMin)} - {formatCurrency(filters.priceMax)}
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+                
+                {filters.search && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                  >
+                    Search: "{filters.search}"
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+                
+                {!filters.inStock && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setFilters(prev => ({ ...prev, inStock: true }))}
+                  >
+                    Include Out of Stock
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+                
+                {filters.isDynamicPricing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setFilters(prev => ({ ...prev, isDynamicPricing: false }))}
+                  >
+                    Dynamic Pricing Only
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-muted-foreground"
+                  onClick={clearAllFilters}
+                >
+                  Clear All
+                </Button>
+              </div>
+            )}
+            
+            {/* Results Count */}
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground">
+                Showing {filteredProducts.length} results
+              </p>
+            </div>
+            
+            {filteredProducts.length === 0 ? (
+              <div className="p-8 text-center border rounded-lg">
+                <h3 className="text-lg font-medium mb-2">No products found</h3>
+                <p className="text-muted-foreground mb-4">
+                  Try adjusting your filters or search term.
+                </p>
+                <Button onClick={clearAllFilters}>
+                  Clear All Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Price Range */}
-            <div>
-              <h3 className="font-medium mb-2">Price Range</h3>
-              <div className="px-2">
-                <Slider
-                  defaultValue={[filters.priceMin, filters.priceMax]}
-                  min={0}
-                  max={maxPrice}
-                  step={1000}
-                  value={priceRange}
-                  onValueChange={handlePriceChange}
-                  className="my-6"
-                />
-                <div className="flex justify-between">
-                  <span>{formatCurrency(priceRange[0])}</span>
-                  <span>{formatCurrency(priceRange[1])}</span>
-                </div>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Other Options */}
-            <div>
-              <h3 className="font-medium mb-2">Other Options</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="in-stock"
-                    checked={filters.inStock}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({ ...prev, inStock: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="in-stock">In Stock Only</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="dynamic-pricing"
-                    checked={filters.isDynamicPricing}
-                    onCheckedChange={(checked) => 
-                      setFilters(prev => ({ ...prev, isDynamicPricing: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="dynamic-pricing">Dynamic Pricing</Label>
-                </div>
-              </div>
-            </div>
-            
-            {/* Clear All Filters Button */}
-            {hasActiveFilters && (
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={clearAllFilters}
-              >
-                Clear All Filters
-              </Button>
             )}
           </div>
         </div>
-        
-        {/* Products Grid */}
-        <div className="flex-1">
-          {/* Active Filters Display */}
-          {hasActiveFilters && (
-            <div className="mb-4 flex flex-wrap gap-2 items-center">
-              <span className="text-sm text-muted-foreground">Active Filters:</span>
-              
-              {filters.category && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => setFilters(prev => ({ ...prev, category: '' }))}
-                >
-                  Category: {categories.find(c => c.slug === filters.category)?.name}
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              )}
-              
-              {filters.collection && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => setFilters(prev => ({ ...prev, collection: '' }))}
-                >
-                  Collection: {filters.collection}
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              )}
-              
-              {filters.materials.map(material => (
-                <Button
-                  key={material}
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => handleMaterialChange(material)}
-                >
-                  Material: {materialOptions.find(m => m.id === material)?.label}
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              ))}
-              
-              {(filters.priceMin > 0 || filters.priceMax < maxPrice) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => {
-                    setPriceRange([0, maxPrice]);
-                    setFilters(prev => ({ ...prev, priceMin: 0, priceMax: maxPrice }));
-                  }}
-                >
-                  Price: {formatCurrency(filters.priceMin)} - {formatCurrency(filters.priceMax)}
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              )}
-              
-              {filters.search && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
-                >
-                  Search: "{filters.search}"
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              )}
-              
-              {!filters.inStock && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => setFilters(prev => ({ ...prev, inStock: true }))}
-                >
-                  Include Out of Stock
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              )}
-              
-              {filters.isDynamicPricing && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => setFilters(prev => ({ ...prev, isDynamicPricing: false }))}
-                >
-                  Dynamic Pricing Only
-                  <X className="ml-1 h-3 w-3" />
-                </Button>
-              )}
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-muted-foreground"
-                onClick={clearAllFilters}
-              >
-                Clear All
-              </Button>
-            </div>
-          )}
-          
-          {/* Results Count */}
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredProducts.length} results
-            </p>
-          </div>
-          
-          {filteredProducts.length === 0 ? (
-            <div className="p-8 text-center border rounded-lg">
-              <h3 className="text-lg font-medium mb-2">No products found</h3>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your filters or search term.
-              </p>
-              <Button onClick={clearAllFilters}>
-                Clear All Filters
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 

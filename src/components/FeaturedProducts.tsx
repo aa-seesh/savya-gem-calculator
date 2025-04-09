@@ -5,8 +5,8 @@ import { products } from '@/data/products';
 import ProductCard from './ProductCard';
 
 const FeaturedProducts: React.FC = () => {
-  // Get only featured products
-  const featuredProducts = products.filter(product => product.featured);
+  // Get only featured products (limit to 3)
+  const featuredProducts = products.filter(product => product.featured).slice(0, 3);
   
   return (
     <section className="py-12 bg-white">
@@ -20,7 +20,7 @@ const FeaturedProducts: React.FC = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {featuredProducts.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
