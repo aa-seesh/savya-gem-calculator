@@ -9,30 +9,33 @@ import {
   ChevronRight,
   Minus,
   Plus,
-  Info,
-  Truck,
-  RotateCcw,
-  Shield
+  Check,
+  Search,
+  X
 } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { products } from '@/data/products';
 import { formatCurrency } from '@/lib/helpers';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { getMaterialBasePrice } from '@/lib/helpers';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +46,8 @@ const ProductDetail: React.FC = () => {
   const [currentImage, setCurrentImage] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [openImageDialog, setOpenImageDialog] = useState(false);
   
   useEffect(() => {
     // Simulate API call to fetch product details
@@ -140,13 +145,14 @@ const ProductDetail: React.FC = () => {
       </>
     );
   }
-  
+
   const materialName = formatMaterialName(product.material);
+  const availableSizes = ["14 inch", "16 inch", "18 inch", "20 inch"];
   
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4 py-8 mt-10">
+      <div className="container mx-auto px-4 py-8 mt-16">
         {/* Breadcrumbs */}
         <nav className="flex mb-6 items-center text-sm">
           <Link to="/" className="text-muted-foreground hover:text-navy-dark">Home</Link>
@@ -159,7 +165,10 @@ const ProductDetail: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
           {/* Product Images - Left Column */}
           <div className="space-y-4">
-            <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden border">
+            <div 
+              className="aspect-square bg-cream rounded-lg overflow-hidden border cursor-pointer"
+              onClick={() => setOpenImageDialog(true)}
+            >
               <img 
                 src={currentImage} 
                 alt={product.name}
@@ -185,260 +194,182 @@ const ProductDetail: React.FC = () => {
                 </button>
               ))}
             </div>
-            
-            {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-4 mt-8">
-              <div className="text-center">
-                <div className="flex justify-center mb-2">
-                  <Truck className="h-6 w-6 text-gold" />
+
+            {/* Fullscreen Image Dialog */}
+            <Dialog open={openImageDialog} onOpenChange={setOpenImageDialog}>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>{product.name}</DialogTitle>
+                </DialogHeader>
+                <div className="relative aspect-square">
+                  <img 
+                    src={currentImage} 
+                    alt={product.name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                <p className="text-xs font-medium">Free Shipping</p>
-                <p className="text-xs text-muted-foreground">On all orders</p>
-              </div>
-              <div className="text-center">
-                <div className="flex justify-center mb-2">
-                  <RotateCcw className="h-6 w-6 text-gold" />
+                <div className="grid grid-cols-6 gap-2 mt-4">
+                  {product.images.map((image: string, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImage(image)}
+                      className={`
+                        aspect-square rounded-md overflow-hidden border-2 
+                        ${currentImage === image ? 'border-gold shadow-md' : 'border-gray-200'}
+                      `}
+                    >
+                      <img 
+                        src={image} 
+                        alt={`${product.name} view ${index + 1}`}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs font-medium">30-Day Returns</p>
-                <p className="text-xs text-muted-foreground">Hassle-free</p>
-              </div>
-              <div className="text-center">
-                <div className="flex justify-center mb-2">
-                  <Shield className="h-6 w-6 text-gold" />
-                </div>
-                <p className="text-xs font-medium">Lifetime Warranty</p>
-                <p className="text-xs text-muted-foreground">Certificate included</p>
-              </div>
-            </div>
+              </DialogContent>
+            </Dialog>
           </div>
           
           {/* Product Info - Right Column */}
           <div>
-            {/* New tag and product name */}
-            <div className="mb-4">
-              {product.isNew && (
-                <Badge className="mb-2 bg-gold hover:bg-gold-dark text-white">
-                  New Arrival
-                </Badge>
-              )}
-              
+            {/* Product name and stock info */}
+            <div className="mb-6">
               <h1 className="text-3xl font-serif font-bold text-navy-dark mb-2">
                 {product.name}
               </h1>
               
-              <p className="text-lg font-medium text-gold mb-4">
-                {formatCurrency(product.price)}
-              </p>
+              <div className="flex items-center mt-2">
+                <Badge className="bg-green-100 text-green-800 font-normal mr-2">
+                  <Check className="h-3 w-3 mr-1" /> In Stock
+                </Badge>
+              </div>
+              
+              <div className="mt-4">
+                <span className="text-2xl font-medium text-gold">
+                  {formatCurrency(product.price)}
+                </span>
+              </div>
             </div>
             
-            {/* Short description */}
+            <Separator className="my-6" />
+            
+            {/* Size Selection */}
             <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">
+                Necklace Size
+              </label>
+              <select 
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-gold"
+              >
+                <option value="">Choose an option</option>
+                {availableSizes.map((size) => (
+                  <option key={size} value={size}>{size}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Quantity */}
+            <div className="flex items-center mb-6">
+              <label className="block text-sm font-medium mr-4">
+                Quantity:
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-md">
+                <button 
+                  className="px-3 py-1 border-r border-gray-300"
+                  onClick={decrementQuantity}
+                  disabled={quantity <= 1}
+                >
+                  <Minus size={16} />
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-12 text-center border-0 focus:outline-none p-1"
+                />
+                <button 
+                  className="px-3 py-1 border-l border-gray-300"
+                  onClick={incrementQuantity}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+            
+            {/* Add to Cart Button */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+              <Button 
+                className="col-span-3 bg-gold hover:bg-gold-dark text-white"
+                size="lg"
+                onClick={handleAddToCart}
+              >
+                Add to cart
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="border-gold text-gold hover:bg-gold-light"
+                size="icon"
+              >
+                <Heart size={20} />
+              </Button>
+            </div>
+            
+            {/* Price breakdown trigger */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full bg-cream text-navy border-cream hover:bg-cream/80 mb-6"
+                >
+                  View Price Breakdown
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle>Price Breakdown</SheetTitle>
+                </SheetHeader>
+                <div className="py-6">
+                  <PriceBreakdown product={product} />
+                </div>
+              </SheetContent>
+            </Sheet>
+          
+            {/* Product details */}
+            <div className="mb-6 space-y-3">
+              <h3 className="text-lg font-medium">Product Details</h3>
               <p className="text-muted-foreground">
                 {product.description}
               </p>
-            </div>
-            
-            <Separator className="my-6" />
-            
-            {/* Product details */}
-            <div className="mb-6 grid grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Material</span>
-                <span className="font-medium">{materialName}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Weight</span>
-                <span className="font-medium">{product.weight} grams</span>
-              </div>
-              {product.purity && (
-                <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">Purity</span>
-                  <span className="font-medium">{product.purity}</span>
-                </div>
-              )}
-              {product.dimensions && (
-                <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">Dimensions</span>
-                  <span className="font-medium">{product.dimensions}</span>
-                </div>
-              )}
-            </div>
-            
-            <Separator className="my-6" />
-            
-            {/* Quantity & Add to Cart */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm font-medium">Quantity:</span>
-                <div className="flex items-center border rounded-md">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={decrementQuantity} 
-                    disabled={quantity <= 1}
-                    className="h-10 w-10"
-                  >
-                    <Minus size={16} />
-                  </Button>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-14 h-10 text-center border-0"
-                  />
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={incrementQuantity}
-                    className="h-10 w-10"
-                  >
-                    <Plus size={16} />
-                  </Button>
-                </div>
-              </div>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="w-full bg-gold hover:bg-gold-dark text-white"
-                  size="lg"
-                  onClick={handleAddToCart}
-                >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Add to Cart
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full border-gold text-gold hover:bg-gold-light"
-                  size="lg"
-                >
-                  <Heart className="mr-2 h-4 w-4" />
-                  Add to Wishlist
-                </Button>
+              <div className="grid grid-cols-2 gap-4 pt-3">
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">Material</span>
+                  <span className="font-medium">{materialName}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">Weight</span>
+                  <span className="font-medium">{product.weight} grams</span>
+                </div>
+                {product.purity && (
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Purity</span>
+                    <span className="font-medium">{product.purity}</span>
+                  </div>
+                )}
+                {product.dimensions && (
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Dimensions</span>
+                    <span className="font-medium">{product.dimensions}</span>
+                  </div>
+                )}
               </div>
-              
-              <Button 
-                variant="ghost" 
-                className="w-full text-muted-foreground"
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                Share this Product
-              </Button>
             </div>
           </div>
         </div>
-        
-        {/* Product Details Tabs */}
-        <Card className="mb-16">
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="w-full grid grid-cols-3 rounded-none">
-              <TabsTrigger value="details">Product Details</TabsTrigger>
-              <TabsTrigger value="specifications">Specifications</TabsTrigger>
-              <TabsTrigger value="care">Care Instructions</TabsTrigger>
-            </TabsList>
-            <CardContent className="pt-6">
-              <TabsContent value="details" className="prose max-w-none">
-                <h3 className="text-lg font-semibold mb-4">About this Design</h3>
-                <p>{product.description}</p>
-                <p>
-                  Each piece in our collection is meticulously crafted by skilled artisans with decades of experience in traditional jewelry making techniques, combined with modern design sensibilities.
-                </p>
-                <p>
-                  This {product.name.toLowerCase()} showcases our commitment to quality and attention to detail, making it a perfect addition to your jewelry collection or a thoughtful gift for someone special.
-                </p>
-              </TabsContent>
-              <TabsContent value="specifications">
-                <h3 className="text-lg font-semibold mb-4">Technical Specifications</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium mb-3">Materials</h4>
-                    <ul className="space-y-3">
-                      <li className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Primary Material:</span>
-                        <span className="font-medium">{materialName}</span>
-                      </li>
-                      <li className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Weight:</span>
-                        <span className="font-medium">{product.weight} grams</span>
-                      </li>
-                      <li className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Purity:</span>
-                        <span className="font-medium">
-                          {product.material.includes('gold-22k') 
-                            ? '22K (91.6%)' 
-                            : product.material.includes('gold-18k')
-                              ? '18K (75.0%)'
-                              : product.material.includes('silver')
-                                ? '925 Sterling Silver'
-                                : 'High Quality'}
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-3">Dimensions & Details</h4>
-                    <ul className="space-y-3">
-                      <li className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Making Technique:</span>
-                        <span className="font-medium">Hand Crafted</span>
-                      </li>
-                      <li className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Finish:</span>
-                        <span className="font-medium">Polished</span>
-                      </li>
-                      <li className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Hallmarked:</span>
-                        <span className="font-medium">Yes</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="care">
-                <h3 className="text-lg font-semibold mb-4">Jewelry Care Guidelines</h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-cream rounded-lg p-4">
-                      <h4 className="font-medium mb-2">Daily Care</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>Store your jewelry in a clean, dry place separate from other pieces.</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>Remove your jewelry before swimming, bathing, or using household cleaners.</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>Put your jewelry on after applying perfume, cosmetics, and hairspray.</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="bg-cream rounded-lg p-4">
-                      <h4 className="font-medium mb-2">Cleaning</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>Clean gold and platinum jewelry with a solution of warm water and mild soap.</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>Gently polish with a soft jewelry cloth to maintain its shine.</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>Have your jewelry professionally cleaned and inspected annually.</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            </CardContent>
-          </Tabs>
-        </Card>
         
         {/* Related Products */}
         {relatedProducts.length > 0 && (
@@ -456,6 +387,86 @@ const ProductDetail: React.FC = () => {
       </div>
       <Footer />
     </>
+  );
+};
+
+// Price Breakdown Component
+const PriceBreakdown: React.FC<{ product: any }> = ({ product }) => {
+  const materialPrice = getMaterialBasePrice(product.material);
+  const isFlatRate = !product.makingCharge || !product.weight;
+  
+  // Material cost calculation
+  let materialCost = 0;
+  let makingChargeCost = 0;
+  
+  if (!isFlatRate) {
+    materialCost = materialPrice * product.weight;
+    if (typeof product.makingCharge === 'number') {
+      // Check if making charge is a percentage or flat
+      if (product.makingChargeType === 'percentage') {
+        makingChargeCost = materialCost * (product.makingCharge / 100);
+      } else {
+        makingChargeCost = product.makingCharge;
+      }
+    }
+  }
+  
+  return (
+    <div className="space-y-6">
+      <div className="border rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left font-medium text-navy">Description</th>
+              <th className="px-4 py-3 text-right font-medium text-navy">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {isFlatRate ? (
+              <tr>
+                <td className="px-4 py-3">Fixed Price</td>
+                <td className="px-4 py-3 text-right">{formatCurrency(product.price)}</td>
+              </tr>
+            ) : (
+              <>
+                <tr>
+                  <td className="px-4 py-3">
+                    Material Cost ({formatMaterialName(product.material)})
+                    <div className="text-xs text-muted-foreground">
+                      ₹{materialPrice}/gram × {product.weight} grams
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">{formatCurrency(materialCost)}</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3">
+                    Making Charge
+                    <div className="text-xs text-muted-foreground">
+                      {product.makingChargeType === 'percentage' 
+                        ? `${product.makingCharge}% of material cost` 
+                        : 'Fixed charge'}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">{formatCurrency(makingChargeCost)}</td>
+                </tr>
+              </>
+            )}
+            <tr className="bg-cream">
+              <td className="px-4 py-3 font-medium">Total</td>
+              <td className="px-4 py-3 text-right font-medium">{formatCurrency(product.price)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div className="text-sm text-muted-foreground">
+        <h4 className="font-medium text-navy mb-2">Note:</h4>
+        <p>
+          The final price may include additional components like GST, certifications, 
+          and hallmarking charges. Price displayed is inclusive of all taxes.
+        </p>
+      </div>
+    </div>
   );
 };
 
