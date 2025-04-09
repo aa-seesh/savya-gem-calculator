@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -397,6 +398,7 @@ const PriceBreakdown: React.FC<{ product: any }> = ({ product }) => {
   // Material cost calculation
   let materialCost = 0;
   let makingChargeCost = 0;
+  let totalPrice = product.price;
   
   if (!isFlatRate) {
     materialCost = materialPrice * product.weight;
@@ -406,6 +408,16 @@ const PriceBreakdown: React.FC<{ product: any }> = ({ product }) => {
         makingChargeCost = materialCost * (product.makingCharge / 100);
       } else {
         makingChargeCost = product.makingCharge;
+      }
+      
+      // Verify that the calculated total matches the product price
+      const calculatedTotal = materialCost + makingChargeCost;
+      // If there's a significant difference, use the product price to ensure consistency
+      if (Math.abs(calculatedTotal - product.price) > 1) {
+        console.log('Price mismatch detected. Using product price for total.', {
+          calculated: calculatedTotal,
+          actual: product.price
+        });
       }
     }
   }
@@ -458,7 +470,7 @@ const PriceBreakdown: React.FC<{ product: any }> = ({ product }) => {
             )}
             <tr className="bg-cream">
               <td className="px-4 py-3 font-medium">Total</td>
-              <td className="px-4 py-3 text-right font-medium">{formatCurrency(product.price)}</td>
+              <td className="px-4 py-3 text-right font-medium">{formatCurrency(totalPrice)}</td>
             </tr>
           </tbody>
         </table>
