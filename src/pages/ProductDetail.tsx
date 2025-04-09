@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -410,6 +409,12 @@ const PriceBreakdown: React.FC<{ product: any }> = ({ product }) => {
       }
     }
   }
+  
+  // Format material name for display
+  const formatMaterialName = (material: string) => {
+    return material.charAt(0).toUpperCase() + 
+      material.slice(1).replace('-', ' ');
+  };
   
   return (
     <div className="space-y-6">
